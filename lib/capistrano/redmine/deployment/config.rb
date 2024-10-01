@@ -47,7 +47,11 @@ module Capistrano
         end
 
         def set(key, value)
-          @config[key.to_sym] = value
+          if value && value != ''
+            @config[key.to_sym] = value
+          else
+            @config.delete(key.to_sym)
+          end
         end
 
         def get(key)
@@ -69,7 +73,10 @@ module Capistrano
         end
 
         def valid?
-          %i[host project repository api_key].all? { |key| get(key).present? }
+          %i[host project repository api_key].all? { |key|
+            val = get(key)
+            val && val != ''
+          }
         end
 
         def method_missing(name)

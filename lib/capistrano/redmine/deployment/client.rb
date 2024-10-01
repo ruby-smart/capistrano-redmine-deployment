@@ -42,14 +42,14 @@ module Capistrano
 
           response = send_deployment(deployment)
 
-          if response['errors']
-            log_deploy_errors(response) if log?
-
-            false
-          else
+          if response['deployment']
             log_deploy_done(response) if log?
 
             true
+          else
+            log_deploy_errors(response) if log?
+
+            false
           end
         end
 
@@ -57,7 +57,9 @@ module Capistrano
 
         def send_deployment(deployment)
           uri  = URI("#{config.host}/projects/#{config.project}/deploy/#{config.repository}.json")
+
           http = Net::HTTP.new(uri.host, uri.port)
+          http.use_ssl = true if uri.port == 443
 
           request                      = Net::HTTP::Post.new(uri.request_uri)
           request["Content-Type"]      = "application/json"
@@ -69,25 +71,31 @@ module Capistrano
           begin
             JSON.parse(response.body)
           rescue JSON::ParserError
-            {}
+            response.body
           end
         end
 
         def log_deploy(deployment)
-          puts "Sending deployment information to #{config.host} (project: '#{config.project}' repo: '#{config.repository}')"
+          puts "Sending deployment information to #{config.host} (project: '#{config.project}' | repo: '#{config.repository}')"
 
           puts "   Commits......: #{deployment[:from_revision]} ... #{deployment[:to_revision]}"
           puts "   Environment..: #{deployment[:environment] || '-'}"
           puts "   Branch.......: #{deployment[:branch] || '-'}"
           puts "   Server(s)....: #{deployment[:servers]}"
+          puts "   Result.......: #{deployment[:result]}"
         end
 
         def log_deploy_done(response)
-          puts "Successfully created deployment ##{response['deployment']['id']}"
+          puts "\e[32mSuccessfully created deployment ##{response['deployment']['id']}\e[0m"
         end
 
         def log_deploy_errors(response)
-          puts "Failed to created deployment: #{response['errors'].join(', ')}"
+          if response['errors']
+            puts "\e[31mFailed to created deployment: #{response['errors'].join(', ')}\e[0m"
+          else
+            puts "\e[31mFailed to created deployment: #{response.inspect}\e[0m"
+          end
+
         end
       end
     end
