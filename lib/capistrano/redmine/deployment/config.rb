@@ -27,9 +27,10 @@ module Capistrano
 
           def config_from_capistrano(capistrano)
             config = {
-              host:       capistrano.fetch(:redmine_host),
-              project:    capistrano.fetch(:redmine_project) || capistrano.fetch(:redmine_project_id),
-              repository: capistrano.fetch(:redmine_repository)
+              host: capistrano.fetch(:redmine_host),
+              project: capistrano.fetch(:redmine_project) || capistrano.fetch(:redmine_project_id),
+              repository: capistrano.fetch(:redmine_repository),
+              host_verification: capistrano.fetch(:redmine_host_verification)
             }
 
             new(config)
@@ -42,12 +43,12 @@ module Capistrano
 
         def initialize(config = {}, file: nil)
           @config = config
-          @file   = file
+          @file = file
           load
         end
 
         def set(key, value)
-          if value && value != ''
+          if value != nil && value != ''
             @config[key.to_sym] = value
           else
             @config.delete(key.to_sym)
@@ -66,7 +67,7 @@ module Capistrano
           return unless other
 
           other.to_h.each do |key, value|
-            next if !value || value == ''
+            next if value == nil || value == ''
 
             set(key, value)
           end

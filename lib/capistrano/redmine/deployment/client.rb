@@ -2,6 +2,7 @@
 
 require 'net/http'
 require 'json'
+require 'openssl'
 
 module Capistrano
   module Redmine
@@ -25,7 +26,7 @@ module Capistrano
         end
 
         def initialize(config, logging: true)
-          @config  = config
+          @config = config
           @logging = logging
         end
 
@@ -56,15 +57,16 @@ module Capistrano
         private
 
         def send_deployment(deployment)
-          uri  = URI("#{config.host}/projects/#{config.project}/deploy/#{config.repository}.json")
+          uri = URI("#{config.host}/projects/#{config.project}/deploy/#{config.repository}.json")
 
           http = Net::HTTP.new(uri.host, uri.port)
           http.use_ssl = true if uri.port == 443
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE if config.host_verification == false
 
-          request                      = Net::HTTP::Post.new(uri.request_uri)
-          request["Content-Type"]      = "application/json"
+          request = Net::HTTP::Post.new(uri.request_uri)
+          request["Content-Type"] = "application/json"
           request['X-Redmine-API-Key'] = config.api_key
-          request.body                 = { deployment: deployment }.to_json
+          request.body = { deployment: deployment }.to_json
 
           response = http.request(request)
 
@@ -77,16 +79,19 @@ module Capistrano
 
         def log_deploy(deployment)
           puts "Sending deployment information to #{config.host} (project: '#{config.project}' | repo: '#{config.repository}')"
-
+          puts "\e[33m   WARNING: Host verification disabled!\e[0m" if config.host_verification == false
+          puts ""
           puts "   Commits......: #{deployment[:from_revision]} ... #{deployment[:to_revision]}"
           puts "   Environment..: #{deployment[:environment] || '-'}"
           puts "   Branch.......: #{deployment[:branch] || '-'}"
           puts "   Server(s)....: #{deployment[:servers]}"
           puts "   Result.......: #{deployment[:result]}"
+          puts ""
         end
 
         def log_deploy_done(response)
           puts "\e[32mSuccessfully created deployment ##{response['deployment']['id']}\e[0m"
+          puts ""
         end
 
         def log_deploy_errors(response)
@@ -95,7 +100,7 @@ module Capistrano
           else
             puts "\e[31mFailed to created deployment: #{response.inspect}\e[0m"
           end
-
+          puts ""
         end
       end
     end
