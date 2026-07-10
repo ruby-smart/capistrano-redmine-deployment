@@ -49,13 +49,43 @@ set(:redmine_repository, "target-redmine-repository-identifier")
 
 # in case of `SSL` issues that are caused by *CRL* (i.e. by LetsEncrypt certificates)
 set(:redmine_host_verification, false)
+
+# alternatively, for instances with a custom CA, point to a CA bundle instead of
+# disabling verification entirely (preferred over :redmine_host_verification)
+set(:redmine_ca_file, "/path/to/ca-bundle.pem")
 ```
 
 ### User-specific credentials
 
+The `api_key` is resolved from the following sources, **later ones win**:
+
+1. capistrano variables: `:redmine_api_key`, or `:redmine_api_key_command` (its stdout is used as the key) as fallback
+2. `.redmine` file in the current directory (`$PWD`) or `$HOME`
+3. the `REDMINE_API_KEY` ENV variable
+
+#### Option A: macOS Keychain (recommended)
+
+Store the key once per developer in the keychain (use a dedicated entry):
+
+    $ security add-generic-password -s ri-redmine-deploy -a "$USER" -w 'YOUR_KEY'
+
+Then point capistrano at a command that reads it, in your `config/deploy.rb`:
+
+```ruby
+set :redmine_api_key_command, 'security find-generic-password -s ri-redmine-deploy -w'
+```
+
+No secret ends up in `deploy.rb` or your SCM — only the command. Once every developer
+has switched over, the `.redmine` file can be removed entirely (it stays supported as a
+fallback).
+
+> Use a **dedicated** keychain entry (e.g. `ri-redmine-deploy`).
+
+#### Option B: `.redmine` file via rake-task
+
 Setup redmine `API-KEY` through rake-task:
 
-    $ rake capistrano:redmine:deploy:setup
+    $ rake capistrano:redmine:deployment:setup
 
 
 ## Redmine requirements

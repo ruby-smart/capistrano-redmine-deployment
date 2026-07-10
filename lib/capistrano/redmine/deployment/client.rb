@@ -60,8 +60,13 @@ module Capistrano
           uri = URI("#{config.host}/projects/#{config.project}/deploy/#{config.repository}.json")
 
           http = Net::HTTP.new(uri.host, uri.port)
-          http.use_ssl = true if uri.port == 443
-          http.verify_mode = OpenSSL::SSL::VERIFY_NONE if config.host_verification == false
+          http.use_ssl = true if uri.scheme == 'https'
+
+          if config.ca_file
+            http.ca_file = config.ca_file
+          elsif config.host_verification == false
+            http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+          end
 
           request = Net::HTTP::Post.new(uri.request_uri)
           request["Content-Type"] = "application/json"
@@ -79,7 +84,8 @@ module Capistrano
 
         def log_deploy(deployment)
           puts "Sending deployment information to #{config.host} (project: '#{config.project}' | repo: '#{config.repository}')"
-          puts "\e[33m   WARNING: Host verification disabled!\e[0m" if config.host_verification == false
+          puts "\e[33m   Using custom CA file: #{config.ca_file}\e[0m" if config.ca_file
+          puts "\e[33m   WARNING: Host verification disabled!\e[0m" if config.ca_file.nil? && config.host_verification == false
           puts ""
           puts "   Commits......: #{deployment[:from_revision]} ... #{deployment[:to_revision]}"
           puts "   Environment..: #{deployment[:environment] || '-'}"
