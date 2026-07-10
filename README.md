@@ -88,12 +88,24 @@ Setup redmine `API-KEY` through rake-task:
     $ rake capistrano:redmine:deployment:setup
 
 
+## Verifying the setup
+
+Once configured, verify that the credentials, host, project and repository resolve
+to a reachable `redmine_deployment` endpoint:
+
+    $ cap <stage> redmine:verify
+
+This receives a single deployment entry from redmine. A response with **no** entries
+(i.e. no deployment has been logged yet) still counts as a success — it only fails
+when the host is unreachable or the credentials / project / repository are wrong.
+
 ## Redmine requirements
 
 Install the plugin `redmine_deployment`.
 
 ## Features
 * logs (success/failed) deployment to associated redmine repository
+* verifies redmine access / configuration (`redmine:verify`)
 
 -----
 

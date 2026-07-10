@@ -1,5 +1,10 @@
 # Capistrano::Redmine::Deployment - CHANGELOG
 
+## [1.2.0] - 2026-07-10
+* **[add]** `redmine:verify` capistrano task to verify config & access by receiving a single deployment
+* **[add]** `Client#receive_deployment` (and `Client.receive_deployment`) - GETs a single deployment entry; an empty (no entries) 2xx response is still treated as valid
+* **[add]** rspec test suite for `Client#receive_deployment`
+
 ## [1.1.0] - 2026-07-10
 * **[add]** ENV layer for config (`REDMINE_API_KEY`, `REDMINE_HOST`, `REDMINE_PROJECT`, `REDMINE_REPOSITORY`, `REDMINE_CA_FILE`)
 * **[add]** `:redmine_api_key` capistrano variable, with `:redmine_api_key_command` (command stdout, e.g. macOS keychain) as fallback
