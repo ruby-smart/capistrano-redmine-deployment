@@ -1,5 +1,8 @@
 # Capistrano::Redmine::Deployment - CHANGELOG
 
+## [1.2.2] - 2026-07-11
+* **[fix]** fetch deployments from the deployments index endpoint
+
 ## [1.2.1] - 2026-07-11
 **[add]** `redmine:verify` task to validate deployment config using `deploy.rb` settings
 
