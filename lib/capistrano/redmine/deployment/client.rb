@@ -167,7 +167,7 @@ module Capistrano
         # @return [Hash, String] the parsed JSON response, or the raw body when
         #   it is not valid JSON.
         def fetch_deployments
-          uri = deploy_uri
+          uri = deployments_uri
           # only a single entry is needed to verify access
           uri.query = 'limit=1'
 
@@ -197,10 +197,16 @@ module Capistrano
           end
         end
 
-        # @return [URI::Generic] the deploy endpoint URI for the configured
-        #   host / project / repository.
+        # @return [URI::Generic] the deploy (POST) endpoint URI for the
+        #   configured host / project / repository.
         def deploy_uri
           URI("#{config.host}/projects/#{config.project}/deploy/#{config.repository}.json")
+        end
+
+        # @return [URI::Generic] the deployments index (GET) endpoint URI for
+        #   the configured host / project.
+        def deployments_uri
+          URI("#{config.host}/projects/#{config.project}/deployments.json")
         end
 
         # Performs an HTTP request, applying SSL and host-verification settings.

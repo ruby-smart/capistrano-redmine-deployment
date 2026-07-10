@@ -45,7 +45,7 @@ RSpec.describe Capistrano::Redmine::Deployment::Client do
 
       expect(captured[:request]).to be_a(Net::HTTP::Get)
       expect(captured[:request]['X-Redmine-API-Key']).to eq('secret-key')
-      expect(captured[:request].path).to eq('/projects/my-project/deploy/my-repo.json?limit=1')
+      expect(captured[:request].path).to eq('/projects/my-project/deployments.json?limit=1')
     end
 
     it 'returns the single deployment from a `deployments` collection' do
