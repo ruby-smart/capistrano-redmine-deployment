@@ -22,6 +22,10 @@ Verify the redmine credentials & access for deployment.
         puts " Shared settings are resolved from ENV or the '.redmine' file (host, project,"
         puts " repository, api_key). Run 'rake capistrano:redmine:deployment:setup' to configure them."
         puts ""
+        puts " NOTE: this rake task has no Capistrano context, so 'set(:redmine_host, ...)'"
+        puts " values from config/deploy.rb are NOT seen here. To verify using deploy.rb"
+        puts " settings, run the stage-aware task instead:  cap <stage> redmine:verify"
+        puts ""
         puts "******************************************************************************************************"
         puts ""
         puts ""
@@ -30,6 +34,7 @@ Verify the redmine credentials & access for deployment.
 
         unless config.valid?
           puts "\e[31mYour redmine configuration is missing or unfinished.\e[0m"
+          puts "Run 'cap <stage> redmine:verify' to verify the stage-aware config."
           puts "Run 'rake capistrano:redmine:deployment:setup' to configure the credentials."
           puts ""
           puts "******************************************************************************************************"

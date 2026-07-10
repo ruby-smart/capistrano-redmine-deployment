@@ -1,5 +1,8 @@
 # Capistrano::Redmine::Deployment - CHANGELOG
 
+## [1.2.1] - 2026-07-11
+**[add]** `redmine:verify` task to validate deployment config using `deploy.rb` settings
+
 ## [1.2.0] - 2026-07-10
 * **[add]** `redmine:verify` capistrano task to verify config & access by receiving a single deployment
 * **[add]** `Client#receive_deployment` (and `Client.receive_deployment`) - GETs a single deployment entry; an empty (no entries) 2xx response is still treated as valid

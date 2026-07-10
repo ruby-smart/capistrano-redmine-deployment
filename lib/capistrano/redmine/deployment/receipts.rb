@@ -71,4 +71,30 @@ namespace :redmine do
       Capistrano::Redmine::Deployment::Client.deploy_fail!(config, deployment)
     end
   end
+
+  desc "Verifies your redmine deployment configuration & access (honors config/deploy.rb)"
+  task :verify do
+    run_locally do
+      # resolve redmine config - `capistrano: self` pulls the shared
+      # `set(:redmine_host, ...)` values from config/deploy.rb, then `.redmine`
+      # files and ENV win over them.
+      config = Capistrano::Redmine::Deployment::Config.resolve(capistrano: self)
+
+      unless config.valid?
+        puts "\e[31m    Seems like your redmine configuration is missing or unfinished.\n    Run rake task 'rake capistrano:redmine:deployment:setup' to start.\n    Skipping redmine verification.\e[0m"
+        next
+      end
+
+      # An empty result (no deployments logged yet) is fine - `false` means the
+      # request itself failed (unreachable host, bad credentials, wrong project/repo).
+      result = Capistrano::Redmine::Deployment::Client.receive_deployment(config)
+
+      puts ""
+      if result == false
+        puts "\e[31mVerification FAILED. Check host, project, repository and api_key.\e[0m"
+      else
+        puts "\e[32mVerification succeeded.\e[0m"
+      end
+    end
+  end
 end
